@@ -2,7 +2,7 @@ const path = require('path');
 const express = require('express');
 const socketIO = require('socket.io');
 const http = require('http');
-
+const { generateMessage } = require('./utils/message');
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
 
@@ -16,17 +16,10 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
     console.log('New user connected from Server side');
     //add socket.emit from Admit text welcome to the chat
-    socket.emit('newMessage', { //We will get the new msg from admin
-        from: 'Admin',
-        text: 'Welcome to the Chat App',
-        createdAt: new Date().getTime()
-    });
+    //We will get the new msg from admin
+    socket.emit('newMessage', generateMessage('Admin', 'Welcome to the Chat App!'));
     //socket.broadcast.emit from admin text new user joined
-    socket.broadcast.emit('newMessage', {
-        from: 'Admin',
-        text: 'New User Joined',
-        createdAt: new Date().getTime()
-    });
+    socket.broadcast.emit('newMessage', generateMessage('Admin', 'New User Joined!'));
     //Create newMessage event
     // socket.emit('newMessage', {
     //     from: 'max@gmail.com',
@@ -37,11 +30,8 @@ io.on('connection', (socket) => {
     socket.on('createMessage', (message) => {
         console.log('The createMessage event', message);
         //io.emit to all users - wired the newMessage event
-        io.emit('newMessage', { //we get the newMessage from the user.
-            from: message.from,
-            text: message.text,
-            createdAt: new Date().getTime()
-        });
+        //we get the newMessage from the user.
+        io.emit('newMessage', generateMessage(message.from, message.text));
 
         //Broadcasting Events - all but me will see msg.
         // socket.broadcast.emit('newMessage', {
