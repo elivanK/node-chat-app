@@ -27,12 +27,12 @@ io.on('connection', (socket) => {
     //     createdAt: 16
     // });
     //Listen to the event - on()
-    socket.on('createMessage', (message) => {
+    socket.on('createMessage', (message, callback) => {
         console.log('The createMessage event', message);
         //io.emit to all users - wired the newMessage event
         //we get the newMessage from the user.
         io.emit('newMessage', generateMessage(message.from, message.text));
-
+        callback('This is from the server.');
         //Broadcasting Events - all but me will see msg.
         // socket.broadcast.emit('newMessage', {
         //     from: message.from,
