@@ -16,14 +16,20 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
     console.log('New user connected from Server side');
     //Create newMessage event
-    socket.emit('newMessage', {
-        from: 'max@gmail.com',
-        text: 'Did you get me msg?',
-        createdAt: 16
-    });
+    // socket.emit('newMessage', {
+    //     from: 'max@gmail.com',
+    //     text: 'Did you get me msg?',
+    //     createdAt: 16
+    // });
     //Listen to the event - on()
     socket.on('createMessage', (message) => {
         console.log('The createMessage event', message);
+        //io.emit to all users - wired the newMessage event
+        io.emit('newMessage', {
+            from: message.from,
+            text: message.text,
+            createdAt: new Date().getTime()
+        });
     });
 
     io.on('disconnetion', (socket) => {

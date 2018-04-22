@@ -2,10 +2,10 @@ const socket = io();
 socket.on('connect', function() {
     console.log('Connceted to the server (/public/js/index.js)');
     //Create the event - emit()
-    socket.emit('createMessage', {
-        from: 'jen@example.com',
-        text: 'Hey. This is Jen.'
-    });
+    // socket.emit('createMessage', {
+    //     from: 'jen@example.com',
+    //     text: 'Hey. This is Jen.'
+    // });
 
 });
 
