@@ -22,6 +22,19 @@ socket.on('newMessage', function(message) {
     //render it to the dom
     jQuery('#messages').append(li);
 });
+//Event listener for the newLocationMessage
+socket.on('newLocationMessage', function(message) {
+    //generate dom items
+    let li = jQuery('<li></li>');
+    let a = jQuery('<a target="_blank">My current location</a>');
+    //set properties
+    li.text(`${message.from}: `);
+    //update anchor tag via attr - set and fetch attributes on jquery seleceted element 
+    a.attr('href', message.url);
+    li.append(a);
+    jQuery('#messages').append(li);
+});
+
 //Event acknowledgment - if the data is valid
 //send from the server back to the client that we got that data (in a callback function).
 // socket.emit('createMessage', {
@@ -43,3 +56,20 @@ jQuery('#message-form').on('submit', function(eve) {
 
     })
 });
+//Setup for the buttono to get geolocation
+const locationButton = jQuery('#send-location');
+locationButton.on('click', function() {
+    //Check if user has geolocation
+    if (!navigator.geolocation) {
+        //if not stop the function execuation via return alert.
+        return alert('Geolocation not supported by your browrser');
+    }
+    navigator.geolocation.getCurrentPosition(function(position) {
+        socket.emit('createLocationMessage', {
+            latitude: position.coords.latitude,
+            longitue: position.coords.longitude
+        });
+    }, function() {
+        alert('Unable to fetch location.');
+    });
+});;
