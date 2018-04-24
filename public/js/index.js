@@ -16,19 +16,21 @@ socket.on('discconet', function() {
 //Listen to the newMessage event
 //When a new message arrive, it will be stored in a list item
 socket.on('newMessage', function(message) {
-    console.log('Listen from index.js - newMessage', message);
+    let formattedTime = moment(message.createdAt).format('h:mm a');
+    //console.log('Listen from index.js - newMessage', message);
     let li = jQuery('<li></li>');
-    li.text(`${message.from}: ${message.text}`);
+    li.text(`${message.from} ${formattedTime}: ${message.text}`);
     //render it to the dom
     jQuery('#messages').append(li);
 });
 //Event listener for the newLocationMessage
 socket.on('newLocationMessage', function(message) {
+    let formattedTime = moment(message.createdAt).format('h:mm a');
     //generate dom items
     let li = jQuery('<li></li>');
     let a = jQuery('<a target="_blank">My current location</a>');
     //set properties
-    li.text(`${message.from}: `);
+    li.text(`${message.from}: ${formattedTime}: `);
     //update anchor tag via attr - set and fetch attributes on jquery seleceted element 
     a.attr('href', message.url);
     li.append(a);
