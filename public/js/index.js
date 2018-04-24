@@ -48,15 +48,16 @@ socket.on('newLocationMessage', function(message) {
 jQuery('#message-form').on('submit', function(eve) {
     //The eve event variable is to override the default behaivor to refresh page 
     eve.preventDefault();
-
+    const messageTextBox = jQuery('[name=message]');
     socket.emit('createMessage', {
         from: 'User',
-        text: jQuery('[name=message]').val()
+        text: messageTextBox.val()
     }, function() {
-
+        //clear the value of the geo location
+        messageTextBox.val('')
     })
 });
-//Setup for the buttono to get geolocation
+//Setup for the button listener to get geolocation
 const locationButton = jQuery('#send-location');
 locationButton.on('click', function() {
     //Check if user has geolocation
@@ -64,12 +65,16 @@ locationButton.on('click', function() {
         //if not stop the function execuation via return alert.
         return alert('Geolocation not supported by your browrser');
     }
+    locationButton.attr('disabled', 'disabled').text('Sending location...');
+
     navigator.geolocation.getCurrentPosition(function(position) {
+        locationButton.removeAttr('disabled').text('Send location');
         socket.emit('createLocationMessage', {
             latitude: position.coords.latitude,
-            longitue: position.coords.longitude
+            longitude: position.coords.longitude
         });
     }, function() {
+        locationButton.removeAttr('disabled').text('Send location');
         alert('Unable to fetch location.');
     });
 });;

@@ -32,7 +32,7 @@ io.on('connection', (socket) => {
         //io.emit to all users - wired the newMessage event
         //we get the newMessage from the user.
         io.emit('newMessage', generateMessage(message.from, message.text));
-        callback('This is from the server.');
+        callback();
 
         //Broadcasting Events - all but me will see msg.
         // socket.broadcast.emit('newMessage', {
