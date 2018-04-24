@@ -18,7 +18,17 @@ function scrollToBottom() {
 
 };
 socket.on('connect', function() {
-    console.log('Connceted to the server (/public/js/index.js)');
+    //console.log('Connceted to the server (/public/js/index.js)');
+    //Join a room
+    const params = jQuery.deparam(window.location.search);
+    socket.emit('join', params, function(err) {
+        if (err) {
+            alert(err);
+            window.location.href = '/';
+        } else {
+            console.log('No error');
+        };
+    });
     //Create the event - emit()
     // socket.emit('createMessage', {
     //     from: 'jen@example.com',
