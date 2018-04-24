@@ -17,24 +17,39 @@ socket.on('discconet', function() {
 //When a new message arrive, it will be stored in a list item
 socket.on('newMessage', function(message) {
     let formattedTime = moment(message.createdAt).format('h:mm a');
-    //console.log('Listen from index.js - newMessage', message);
-    let li = jQuery('<li></li>');
-    li.text(`${message.from} ${formattedTime}: ${message.text}`);
-    //render it to the dom
-    jQuery('#messages').append(li);
+    const template = jQuery('#message-template').html();
+    let html = Mustache.render(template, {
+        text: message.text,
+        from: message.from,
+        createdAt: formattedTime
+    });
+    jQuery('#messages').append(html);
+
+    // //console.log('Listen from index.js - newMessage', message);
+    // let li = jQuery('<li></li>');
+    // li.text(`${message.from} ${formattedTime}: ${message.text}`);
+    // //render it to the dom
+    // jQuery('#messages').append(li);
 });
 //Event listener for the newLocationMessage
 socket.on('newLocationMessage', function(message) {
     let formattedTime = moment(message.createdAt).format('h:mm a');
+    const template = jQuery('#location-message-template').html();
+    let html = Mustache.render(template, {
+        from: message.from,
+        url: message.url,
+        createdAt: formattedTime
+    });
+    jQuery('#messages').append(html);
     //generate dom items
-    let li = jQuery('<li></li>');
-    let a = jQuery('<a target="_blank">My current location</a>');
-    //set properties
-    li.text(`${message.from}: ${formattedTime}: `);
-    //update anchor tag via attr - set and fetch attributes on jquery seleceted element 
-    a.attr('href', message.url);
-    li.append(a);
-    jQuery('#messages').append(li);
+    // let li = jQuery('<li></li>');
+    // let a = jQuery('<a target="_blank">My current location</a>');
+    // //set properties
+    // li.text(`${message.from}: ${formattedTime}: `);
+    // //update anchor tag via attr - set and fetch attributes on jquery seleceted element 
+    // a.attr('href', message.url);
+    // li.append(a);
+    // jQuery('#messages').append(li);
 });
 
 //Event acknowledgment - if the data is valid
