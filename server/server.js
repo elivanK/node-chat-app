@@ -1,70 +1,59 @@
 const path = require('path');
+const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
-const http = require('http');
+
 const { generateMessage, generateLocationMessage } = require('./utils/message');
 const { isRealString } = require('./utils/validation');
+const { Users } = require('./utils/users');
+
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
-
-const app = express();
-const server = http.createServer(app);
-//Config server to use socket.io
-const io = socketIO(server);
+var app = express();
+var server = http.createServer(app);
+var io = socketIO(server);
+var users = new Users();
 
 app.use(express.static(publicPath));
-//Register event listener
+
 io.on('connection', (socket) => {
-    console.log('New user connected from Server side');
-    //add socket.emit from Admit text welcome to the chat
-    //We will get the new msg from admin
-    socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app!'));
-    //socket.broadcast.emit from admin text new user joined
-    socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined!'));
-    //Create newMessage event
-    // socket.emit('newMessage', {
-    //     from: 'max@gmail.com',
-    //     text: 'Did you get me msg?',
-    //     createdAt: 16
-    // });
+    console.log('New user connected');
+
     socket.on('join', (params, callback) => {
-        //valid name and room - not empty or not a string 
         if (!isRealString(params.name) || !isRealString(params.room)) {
-            callback('Name and room name are required');
+            return callback('Name and room name are required.');
         }
-        //Adding a user to the room
+
         socket.join(params.room);
+        users.removeUser(socket.id);
+        users.addUser(socket.id, params.name, params.room);
+
+        io.to(params.room).emit('updateUserList', users.getUserList(params.room));
         socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
-        //broadcast only to the users inside the room
         socket.broadcast.to(params.room).emit('newMessage', generateMessage('Admin', `${params.name} has joined.`));
         callback();
-
     });
-    //Listen to the event - on()
+
     socket.on('createMessage', (message, callback) => {
-        console.log('The createMessage event', message);
-        //io.emit to all users - wired the newMessage event
-        //we get the newMessage from the user.
+        console.log('createMessage', message);
         io.emit('newMessage', generateMessage(message.from, message.text));
         callback();
-
-        //Broadcasting Events - all but me will see msg.
-        // socket.broadcast.emit('newMessage', {
-        //     from: message.from,
-        //     text: message.text,
-        //     createdAt: new Date().getTime()
-        // });
     });
+
     socket.on('createLocationMessage', (coords) => {
         io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
     });
 
-    io.on('disconnetion', (socket) => {
-        console.log('User was disconneted');
-    });
+    socket.on('disconnect', () => {
+        var user = users.removeUser(socket.id);
 
+        if (user) {
+            io.to(user.room).emit('updateUserList', users.getUserList(user.room));
+            io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} has left.`));
+        }
+    });
 });
 
-
-
-server.listen(port, () => console.log(`Server is running on port ${port}`));
+server.listen(port, () => {
+    console.log(`Server is up on ${port}`);
+});
