@@ -18,9 +18,9 @@ io.on('connection', (socket) => {
     console.log('New user connected from Server side');
     //add socket.emit from Admit text welcome to the chat
     //We will get the new msg from admin
-    socket.emit('newMessage', generateMessage('Admin', 'Welcome to the Chat App!'));
+    socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app!'));
     //socket.broadcast.emit from admin text new user joined
-    socket.broadcast.emit('newMessage', generateMessage('Admin', 'New User Joined!'));
+    socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined!'));
     //Create newMessage event
     // socket.emit('newMessage', {
     //     from: 'max@gmail.com',
@@ -32,6 +32,11 @@ io.on('connection', (socket) => {
         if (!isRealString(params.name) || !isRealString(params.room)) {
             callback('Name and room name are required');
         }
+        //Adding a user to the room
+        socket.join(params.room);
+        socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
+        //broadcast only to the users inside the room
+        socket.broadcast.to(params.room).emit('newMessage', generateMessage('Admin', `${params.name} has joined.`));
         callback();
 
     });
